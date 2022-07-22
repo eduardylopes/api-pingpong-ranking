@@ -19,7 +19,6 @@ export class PlayersService {
     }
 
     const player = await this.create(createPlayerDto);
-
     return player;
   }
 
@@ -84,6 +83,6 @@ export class PlayersService {
   }
 
   private async delete(email: string): Promise<void> {
-    await this.playerModel.remove({ email });
+    await this.playerModel.deleteOne({ email });
   }
 }
