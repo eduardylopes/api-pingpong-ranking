@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreatePlayerDto } from './dtos/create-player.dto';
 import { Player } from './interfaces/player.interface';
 import { v4 as uuidv4 } from 'uuid';
@@ -7,8 +7,6 @@ import { UpdatePlayerDto } from './dtos/update-player.dto';
 @Injectable()
 export class PlayersService {
   private players: Player[] = [];
-
-  private readonly logger = new Logger(PlayersService.name);
 
   async createPlayer(createPlayerDto: CreatePlayerDto): Promise<void> {
     const { email } = createPlayerDto;
@@ -41,7 +39,21 @@ export class PlayersService {
   async listPlayer(email: string): Promise<Player> {
     const player = await this.findByEmail(email);
 
+    if (!player) {
+      throw new HttpException('Player not found', HttpStatus.NOT_FOUND);
+    }
+
     return player;
+  }
+
+  async deletePlayer(email: string): Promise<void> {
+    const player = await this.findByEmail(email);
+
+    if (!player) {
+      throw new HttpException('Player not found', HttpStatus.NOT_FOUND);
+    }
+
+    await this.delete(email);
   }
 
   private async create({
@@ -58,8 +70,6 @@ export class PlayersService {
       rankPosition: 1,
       urlProfileImage: 'https://github.com/eduardylopes.jpg',
     };
-
-    // this.logger.log(player);
 
     await this.players.push(player);
   }
@@ -82,5 +92,13 @@ export class PlayersService {
 
   private async findAll(): Promise<Player[]> {
     return this.players;
+  }
+
+  private async delete(email: string): Promise<void> {
+    const playerIndex = await this.players.findIndex(
+      (player) => player.email === email,
+    );
+
+    await this.players.splice(playerIndex, 1);
   }
 }
