@@ -42,13 +42,16 @@ export class PlayersService {
   }
 
   async getPlayer(_id: string): Promise<Player> {
-    const player = await this.findById(_id);
+    try {
+      const player = await this.findById(_id);
+      if (!player) {
+        throw new HttpException('Player not found', HttpStatus.NOT_FOUND);
+      }
 
-    if (!player) {
-      throw new HttpException('Player not found', HttpStatus.NOT_FOUND);
+      return player;
+    } catch (error) {
+      console.log(error);
     }
-
-    return player;
   }
 
   async deletePlayer(email: string): Promise<void> {
@@ -77,28 +80,29 @@ export class PlayersService {
     _id: string,
     updatePlayerDto: UpdatePlayerDto,
   ): Promise<Player> {
-    return await this.playerModel
-      .findOneAndUpdate({ _id }, { $set: updatePlayerDto })
-      .exec();
+    return await this.playerModel.findOneAndUpdate(
+      { _id },
+      { $set: updatePlayerDto },
+    );
   }
 
   private async findById(_id: string): Promise<Player> {
-    const player = await this.playerModel.findOne({ _id }).exec();
+    const player = await this.playerModel.findOne({ _id });
 
     return player;
   }
 
   private async findByEmail(email: string): Promise<Player> {
-    const player = await this.playerModel.findOne({ email }).exec();
+    const player = await this.playerModel.findOne({ email });
 
     return player;
   }
 
   private async findAll(): Promise<Player[]> {
-    return this.playerModel.find().exec();
+    return this.playerModel.find();
   }
 
   private async delete(email: string): Promise<void> {
-    await this.playerModel.remove({ email });
+    await this.playerModel.deleteOne({ email });
   }
 }
