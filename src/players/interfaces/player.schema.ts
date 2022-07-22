@@ -2,12 +2,12 @@ import * as mongoose from 'mongoose';
 
 export const PlayerSchema = new mongoose.Schema(
   {
-    name: String,
+    name: { type: String },
     email: { type: String, unique: true },
-    telephone: { type: String, unique: true },
-    ranking: String,
-    rankPosition: Number,
-    urlProfileImage: String,
+    telephone: { type: String },
+    ranking: { type: String },
+    rankPosition: { type: Number },
+    urlProfileImage: { type: String },
   },
   { timestamps: true, collection: 'players' },
 );

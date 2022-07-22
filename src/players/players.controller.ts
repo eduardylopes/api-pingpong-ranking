@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Param,
   Post,
   Put,
   Query,
@@ -21,9 +22,12 @@ export class PlayersController {
     await this.playersService.createPlayer(createPlayerDto);
   }
 
-  @Put()
-  async updatePlayer(@Body() updatePlayerDto: UpdatePlayerDto) {
-    await this.playersService.updatePlayer(updatePlayerDto);
+  @Put('/:_id')
+  async updatePlayer(
+    @Body() updatePlayerDto: UpdatePlayerDto,
+    @Param('_id') _id: string,
+  ) {
+    await this.playersService.updatePlayer(_id, updatePlayerDto);
   }
 
   @Delete()
@@ -31,13 +35,13 @@ export class PlayersController {
     await this.playersService.deletePlayer(email);
   }
 
-  @Get('player')
-  async listPlayer(@Query('email') email: string) {
-    return await this.playersService.listPlayer(email);
+  @Get('/:_id')
+  async getPlayer(@Param('_id') _id: string) {
+    return await this.playersService.getPlayer(_id);
   }
 
   @Get()
-  async listAllPlayers(): Promise<Player[]> {
-    return await this.playersService.listAllPlayers();
+  async getAllPlayers(): Promise<Player[]> {
+    return await this.playersService.getAllPlayers();
   }
 }

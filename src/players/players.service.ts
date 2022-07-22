@@ -7,7 +7,9 @@ import { Model } from 'mongoose';
 
 @Injectable()
 export class PlayersService {
-  constructor(@InjectModel('Player') private playerModel: Model<Player>) {}
+  constructor(
+    @InjectModel('Player') private readonly playerModel: Model<Player>,
+  ) {}
 
   async createPlayer(createPlayerDto: CreatePlayerDto): Promise<Player> {
     const { email } = createPlayerDto;
@@ -15,31 +17,32 @@ export class PlayersService {
     const playerAlreadyExists = await this.findByEmail(email);
 
     if (playerAlreadyExists) {
-      throw new HttpException('Player already exists', HttpStatus.BAD_REQUEST);
+      throw new HttpException('Player already exists', HttpStatus.CONFLICT);
     }
 
     const player = await this.create(createPlayerDto);
     return player;
   }
 
-  async updatePlayer(updatePlayerDto: UpdatePlayerDto): Promise<void> {
-    const { email } = updatePlayerDto;
+  async updatePlayer(
+    _id: string,
+    updatePlayerDto: UpdatePlayerDto,
+  ): Promise<void> {
+    const player = await this.findById(_id);
 
-    const playerAlreadyExists = await this.findByEmail(email);
-
-    if (!playerAlreadyExists) {
+    if (!player) {
       throw new HttpException('Player not found', HttpStatus.NOT_FOUND);
     }
 
-    this.update(updatePlayerDto);
+    this.update(_id, updatePlayerDto);
   }
 
-  async listAllPlayers(): Promise<Player[]> {
+  async getAllPlayers(): Promise<Player[]> {
     return await this.findAll();
   }
 
-  async listPlayer(email: string): Promise<Player> {
-    const player = await this.findByEmail(email);
+  async getPlayer(_id: string): Promise<Player> {
+    const player = await this.findById(_id);
 
     if (!player) {
       throw new HttpException('Player not found', HttpStatus.NOT_FOUND);
@@ -59,17 +62,30 @@ export class PlayersService {
   }
 
   private async create(createPlayerDto: CreatePlayerDto): Promise<Player> {
+    const playerAlreadyExists = await this.findByEmail(createPlayerDto.email);
+
+    if (playerAlreadyExists) {
+      throw new HttpException('Player already exists', HttpStatus.CONFLICT);
+    }
+
     const playerCreated = new this.playerModel(createPlayerDto);
 
     return await playerCreated.save();
   }
 
-  private async update(updatePlayerDto: UpdatePlayerDto): Promise<Player> {
-    const { email } = updatePlayerDto;
-
+  private async update(
+    _id: string,
+    updatePlayerDto: UpdatePlayerDto,
+  ): Promise<Player> {
     return await this.playerModel
-      .findOneAndUpdate({ email }, { $set: updatePlayerDto })
+      .findOneAndUpdate({ _id }, { $set: updatePlayerDto })
       .exec();
+  }
+
+  private async findById(_id: string): Promise<Player> {
+    const player = await this.playerModel.findOne({ _id }).exec();
+
+    return player;
   }
 
   private async findByEmail(email: string): Promise<Player> {
@@ -83,6 +99,6 @@ export class PlayersService {
   }
 
   private async delete(email: string): Promise<void> {
-    await this.playerModel.deleteOne({ email });
+    await this.playerModel.remove({ email });
   }
 }
