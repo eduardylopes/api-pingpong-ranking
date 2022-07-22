@@ -5,10 +5,13 @@ import {
   HttpException,
   HttpStatus,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
+  private readonly logger = new Logger(AllExceptionsFilter.name);
+
   catch(exception: InternalServerErrorException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
@@ -19,7 +22,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const responseMessage = (type, message) => {
+    const responseMessage = (type: string, message: string) => {
       response.status(status).json({
         statusCode: status,
         path: request.url,
@@ -33,5 +36,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     } else {
       responseMessage(exception.name, exception.message);
     }
+
+    this.logger.error(`Error Message: ${exception.message}`);
   }
 }
