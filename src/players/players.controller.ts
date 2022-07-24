@@ -19,7 +19,7 @@ export class PlayersController {
 
   @Post()
   async createPlayer(@Body() createPlayerDto: CreatePlayerDto) {
-    await this.playersService.createPlayer(createPlayerDto);
+    return await this.playersService.createPlayer(createPlayerDto);
   }
 
   @Put('/:_id')

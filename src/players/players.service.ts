@@ -42,16 +42,12 @@ export class PlayersService {
   }
 
   async getPlayer(_id: string): Promise<Player> {
-    try {
-      const player = await this.findById(_id);
-      if (!player) {
-        throw new HttpException('Player not found', HttpStatus.NOT_FOUND);
-      }
-
-      return player;
-    } catch (error) {
-      console.log(error);
+    const player = await this.findById(_id);
+    if (!player) {
+      throw new HttpException('Player not found', HttpStatus.NOT_FOUND);
     }
+
+    return player;
   }
 
   async deletePlayer(email: string): Promise<void> {

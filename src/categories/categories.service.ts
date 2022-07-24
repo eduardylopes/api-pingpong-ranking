@@ -95,6 +95,14 @@ export class CategoriesService {
     await this.updateByCategory(category, categoryFound);
   }
 
+  async getPlayerCategory(_id: string) {
+    return await this.findPlayerInCategories(_id);
+  }
+
+  private async findPlayerInCategories(_id: any) {
+    return await this.categoryModel.findOne().where('players').in(_id).exec();
+  }
+
   private async create(
     createCategoryDto: CreateCategoryDto,
   ): Promise<Category> {
